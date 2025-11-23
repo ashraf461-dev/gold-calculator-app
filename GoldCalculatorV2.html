@@ -225,7 +225,7 @@
 
         let currentGoldPrices = { ...INITIAL_GOLD_PRICES };
         let isProductLoaded = false;
-        let html5QrCode = null;
+        let html5QrCode = null; // متغير لقارئ الكود
 
         // 2. دوال المساعدة
         const formatCurrency = (amount) => `${(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ج.م`;
@@ -239,7 +239,7 @@
             const pricePerGram = currentGoldPrices[purity] || 0; 
             const metalCost = weight * pricePerGram;
             const totalStampFee = weight * stampFeePerGram;
-            const finalTotal = metalCost + craftsmanshipFee + totalStampFee;
+            const finalTotal = metalCost + craftsmanshipFee + totalStampFee; // لا يوجد ضريبة
 
             const resultsHtml = `
                 <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
@@ -304,18 +304,28 @@
             }
         };
 
-        // 3. دوال الماسح الضوئي (Scanner)
+        // =======================================================
+        // PART 3: JAVASCRIPT UI SETUP AND EVENT LISTENERS
+        // =======================================================
+
+        // 5. دوال الماسح الضوئي (Scanner)
         const startScanner = () => {
             const modal = document.getElementById('scanner-modal');
             modal.classList.add('open');
             const messageElement = document.getElementById('reader-message');
             messageElement.textContent = 'جارٍ البحث عن الكاميرا...';
 
-            if (typeof Html5Qrcode === 'undefined') {
-                messageElement.textContent = 'خطأ: لم يتم تحميل مكتبة قارئ الكود.';
+            if (!window.Html5Qrcode) {
+                messageElement.textContent = 'خطأ: لم يتم تحميل مكتبة قارئ الكود. تأكد من اتصالك بالإنترنت.';
                 return;
             }
             
+            // تحقق إذا كان الماسح يعمل بالفعل
+            if (html5QrCode && html5QrCode.isScanning) {
+                messageElement.textContent = 'الماسح يعمل بالفعل.';
+                return;
+            }
+
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
@@ -333,6 +343,7 @@
             })
             .catch((err) => {
                 messageElement.textContent = 'فشل بدء الكاميرا. السبب: ' + err.message + ' (تأكد من إعطاء الإذن).';
+                console.error("Camera start failed:", err);
             });
         };
 
@@ -348,7 +359,7 @@
             }
         };
 
-        // 4. تهيئة الواجهة والمستمعات
+        // 6. تهيئة الواجهة
         const setupUI = () => {
             const puritySelect = document.getElementById('purity-select');
             const priceUpdateInputs = document.getElementById('price-update-inputs');
@@ -367,14 +378,14 @@
                 const div = document.createElement('div');
                 div.innerHTML = `
                     <label class="block text-sm font-medium text-gray-700">عيار ${karat}</label>
-                    <input type="number" id="price-${karat}" value="${currentGoldPrices[karat].toFixed(2)}" step="0.01" class="w-full text-input text-left font-mono"/>
+                    <input type="number" id="price-${karat}" value="${currentGoldPrices[karat].toFixed(2)}" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg text-left font-mono"/>
                 `;
                 priceUpdateInputs.appendChild(div);
             });
             
             document.getElementById('last-updated').textContent = `تحديث أولي: ${new Date().toLocaleDateString('ar-EG')}`;
 
-            // إضافة مستمعي الأحداث للحساب
+            // إضافة مستمعي الأحداث
             ['weight-input', 'purity-select', 'craftsmanship-input', 'stamp-fee-input'].forEach(id => {
                 document.getElementById(id).addEventListener('input', calculatePrice);
             });
@@ -408,12 +419,15 @@
                 try {
                     document.execCommand('copy');
                     document.getElementById('copy-status').textContent = 'تم النسخ بنجاح!';
+                    document.getElementById('copy-status').className = 'text-center font-medium text-green-600';
                 } catch (err) {
                     document.getElementById('copy-status').textContent = 'فشل النسخ!';
+                    document.getElementById('copy-status').className = 'text-center font-medium text-red-500';
                 }
                 setTimeout(() => document.getElementById('copy-status').textContent = '', 3000);
             });
             
+            // معالجة إدخال الباركود
             barcodeInput.addEventListener('input', (e) => {
                 const code = e.target.value.trim();
                 if (code.length >= 4) { 

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة تسعير الذهب - مصوغات إيهاب كرموز وأخوته</title>
+    <!-- تحميل مكتبة Tailwind CSS مباشرة -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- تحميل مكتبة Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- مكتبة قراءة الباركود والكيو آر كود -->
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+
+    <style>
+        /* خط القاهرة لدعم اللغة العربية */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-sans { font-family: 'Cairo', sans-serif; }
+        .modal { display: none; }
+        .modal.open { display: block; }
+        /* تحديد ارتفاع القارئ */
+        #reader { width: 100%; height: 300px; } 
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8 font-sans">
+    <div class="max-w-xl mx-auto space-y-8">
+        
+        <!-- ======================================================= -->
+        <!-- رأس الصفحة (Header) - اسم المتجر والشعار -->
+        <!-- ======================================================= -->
+        <header class="bg-white p-6 rounded-3xl shadow-2xl border-b-4 border-yellow-500 text-center">
+            <!-- الشعار -->
+            <img 
+                src="https://scontent.fcai1-3.fna.fbcdn.net/v/t39.30808-6/386538519_645676091034984_4961061305986289104_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFx1BloX8fTG0T7P677BZeSfFM9BLX9Oxl8Uz0Etf07GY6y56jdPvUaBERy3o1DqWJUxUTOUidFTE2uXOhdXP7K&_nc_ohc=BqUvHWwhRLkQ7kNvwEZdEtO&_nc_oc=AdmwNZoIDiL_NvSEnJvmNO7lbbUjkR5_3TRYBJx-w2jvovMCcd2QVf43k2b8G4F9h17G2ax0grpngSeTLWPYI&_nc_zt=23&_nc_ht=scontent.fcai1-3.fna&_nc_gid=u51pnq-LuZ7bWRz9SOW8ig&oh=00_Afh6uTtB0ZwsyItuQBfmWSNofXW87RTXY-GVAFVl0kOTdQ&oe=691220ED" 
+                onerror="this.onerror=null; this.src='https://placehold.co/80x80/FFD700/000000?text=GOLD'"
+                alt="شعار مصوغات إيهاب كرموز وأخوته" 
+                class="mx-auto w-20 h-20 object-contain mb-3 rounded-full border-2 border-yellow-400"
+            />
+            <h2 class="text-xl font-extrabold text-gray-800 mb-1">مصوغات إيهاب كرموز وأخوته</h2>
+            <h1 class="text-3xl font-extrabold text-indigo-700">حاسبة سعر الذهب الفورية (ج.م)</h1>
+        </header>
+
+        <!-- ======================================================= -->
+        <!-- قسم تحديث الأسعار يدوياً (Manual Price Update) -->
+        <!-- ======================================================= -->
+        <div class="bg-yellow-50 p-6 rounded-3xl shadow-lg border-2 border-yellow-300">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fa-solid fa-calculator ml-2 text-yellow-600"></i>
+                تحديث أسعار السوق (إلزامي)
+            </h3>
+            <div id="price-update-inputs" class="grid grid-cols-3 gap-3">
+                <!-- Inputs for 24, 21, 18 -->
+            </div>
+            <button id="apply-prices-btn" class="w-full mt-4 py-2 bg-yellow-600 text-white font-semibold rounded-xl hover:bg-yellow-700 transition duration-300">
+                تطبيق الأسعار الجديدة
+            </button>
+            <p id="last-updated" class="text-sm text-center text-gray-600 mt-2"></p>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- قسم إدخال الباركود / المنتج -->
+        <!-- ======================================================= -->
+        <div class="bg-white p-6 rounded-3xl shadow-xl space-y-6">
+            <h3 class="text-xl font-bold text-indigo-700 border-r-4 border-indigo-500 pr-3">
+                إدخال القطعة
+            </h3>
+            <div>
+                <label for="barcode-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                    <i class="fa-solid fa-barcode ml-2 text-indigo-500"></i>
+                    امسح الباركود أو أدخل الرقم يدوياً
+                </label>
+                <input
+                    type="text"
+                    id="barcode-input"
+                    placeholder="مثال: 1001"
+                    class="w-full p-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono text-left rtl:text-right"
+                />
+                <button id="scan-camera-btn" class="w-full mt-2 py-2 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition duration-300">
+                    <i class="fa-solid fa-camera ml-2"></i> مسح بالكاميرا (تجريبي)
+                </button>
+                <p id="product-name-display" class="mt-2 text-sm font-semibold text-green-600"></p>
+            </div>
+            
+            <!-- حقول الإدخال اليدوي -->
+            <div id="manual-inputs-section" class="space-y-4">
+                <!-- Ciyyar Input -->
+                <div>
+                    <label for="purity-select" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-gauge-high ml-2 text-indigo-500"></i>
+                        عيار الذهب (القيراط)
+                    </label>
+                    <select id="purity-select" class="w-full p-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono text-left rtl:text-right">
+                        <!-- Options will be added by JS -->
+                    </select>
+                </div>
+
+                <!-- Weight Input -->
+                <div>
+                    <label for="weight-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-scale-balanced ml-2 text-indigo-500"></i>
+                        وزن القطعة (بالجرام)
+                    </label>
+                    <input type="number" id="weight-input" placeholder="مثال: 4.5" min="0" step="0.01" class="w-full p-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono text-left rtl:text-right"/>
+                </div>
+
+                <!-- Craftsmanship Fee Input -->
+                <div>
+                    <label for="craftsmanship-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-hammer ml-2 text-indigo-500"></i>
+                        رسوم المصنعية (ثابتة للقطعة)
+                    </label>
+                    <input type="number" id="craftsmanship-input" placeholder="مثال: 150.00" min="0" step="0.01" class="w-full p-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono text-left rtl:text-right"/>
+                </div>
+
+                <!-- Stamp Fee Per Gram Input -->
+                <div>
+                    <label for="stamp-fee-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-stamp ml-2 text-indigo-500"></i>
+                        رسوم الدمغة لكل جرام
+                    </label>
+                    <input type="number" id="stamp-fee-input" placeholder="مثال: 10.00" min="0" step="0.01" class="w-full p-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono text-left rtl:text-right"/>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ======================================================= -->
+        <!-- قسم ملخص النتائج (Results Summary) -->
+        <!-- ======================================================= -->
+        <div class="bg-indigo-700 p-6 rounded-3xl shadow-xl text-white space-y-4">
+            <h2 class="text-2xl font-bold border-b border-indigo-500 pb-3 mb-4 flex items-center justify-center">
+                <i class="fa-solid fa-money-bill-wave ml-2 text-yellow-300"></i>
+                ملخص التكلفة النهائية
+            </h2>
+            <div id="results-details" class="space-y-2">
+                <!-- Results will be displayed here -->
+            </div>
+            <div class="flex justify-between items-center text-3xl pt-4 font-extrabold text-white border-t border-indigo-500 mt-4">
+                <span>الإجمالي الكلي:</span>
+                <span id="final-total" class="font-mono text-4xl text-yellow-400">0.00 ج.م</span>
+            </div>
+        </div>
+        
+        <!-- ======================================================= -->
+        <!-- قسم الملخص الجاهز للنسخ -->
+        <!-- ======================================================= -->
+        <div class="bg-white p-6 rounded-3xl shadow-xl space-y-4">
+            <h3 class="text-xl font-bold text-indigo-700">ملخص جاهز للمحادثة</h3>
+            <textarea id="conversation-summary" readonly class="w-full p-3 h-48 border border-gray-300 rounded-xl bg-gray-50 font-sans text-sm resize-none"></textarea>
+            <button id="copy-summary-btn" class="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md">
+                <i class="fa-solid fa-copy ml-2"></i>
+                نسخ الملخص
+            </button>
+            <p id="copy-status" class="text-center font-medium"></p>
+        </div>
+
+    </div>
+    
+    <!-- ======================================================= -->
+    <!-- نافذة الماسح الضوئي (Modal Scanner) -->
+    <!-- ======================================================= -->
+    <div id="scanner-modal" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+                <i class="fa-solid fa-qrcode ml-2"></i> ماسح الباركود بالكاميرا
+            </h3>
+            <p class="text-sm text-red-600 bg-red-100 p-3 rounded-lg mb-4">
+                **تحذير هام:** قد لا تعمل الكاميرا إذا تم فتح الملف محلياً (`file://`). يجب رفع الملف على خادم (HTTPS) لضمان الأمان والوظائف الكاملة.
+            </p>
+            <div id="reader" class="w-full h-64 border border-gray-300 rounded-lg overflow-hidden mb-4"></div>
+            <div id="reader-message" class="text-center text-gray-600 mb-4">جارٍ تحميل الكاميرا...</div>
+            <button id="close-scanner-btn" class="w-full py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700">
+                إغلاق الماسح
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- JavaScript Core Logic and UI Setup -->
+    <!-- ======================================================= -->
+    <script>
+        // =======================================================
+        // PART 2: JAVASCRIPT CORE LOGIC AND CONSTANTS
+        // =======================================================
+
+        // 1. ثوابت الأسعار والخيارات
+        const INITIAL_GOLD_PRICES = {
+            24: 6086.00, 
+            22: 5579.00, 
+            21: 5325.00, 
+            18: 4564.00, 
+            14: 3550.00, 
+        };
+
+        const PRODUCT_CATALOG = {
+            "1001": { name: "خاتم سوليتير عريض", weight: 4.5, purity: 21, craftsmanship: 300.00, stampFee: 12.00 },
+            "1002": { name: "قلادة خفيفة", weight: 7.2, purity: 18, craftsmanship: 180.00, stampFee: 8.00 },
+            "1003": { name: "إسوارة عيار 24", weight: 15.0, purity: 24, craftsmanship: 50.00, stampFee: 20.00 },
+            // **يمكن تعديل هذه القائمة بقطع متجرك الفعلية**
+        };
+
+        const PURITY_OPTIONS = [
+            { value: 24, label: '24 قيراط (999)' },
+            { value: 22, label: '22 قيراط (916)' },
+            { value: 21, label: '21 قيراط (875)' },
+            { value: 18, label: '18 قيراط (750)' },
+            { value: 14, label: '14 قيراط (585)' },
+        ];
+
+        let currentGoldPrices = { ...INITIAL_GOLD_PRICES };
+        let isProductLoaded = false;
+        let html5QrCode = null; // متغير لقارئ الكود
+
+        // 2. دوال المساعدة
+        const formatCurrency = (amount) => `${(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ج.م`;
+
+        const calculatePrice = () => {
+            const weight = parseFloat(document.getElementById('weight-input').value) || 0;
+            const purity = parseInt(document.getElementById('purity-select').value) || 21;
+            const craftsmanshipFee = parseFloat(document.getElementById('craftsmanship-input').value) || 0;
+            const stampFeePerGram = parseFloat(document.getElementById('stamp-fee-input').value) || 0;
+            
+            const pricePerGram = currentGoldPrices[purity] || 0; 
+            const metalCost = weight * pricePerGram;
+            const totalStampFee = weight * stampFeePerGram;
+            const finalTotal = metalCost + craftsmanshipFee + totalStampFee; // لا يوجد ضريبة
+
+            const resultsHtml = `
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>سعر جرام الـ ${purity} قيراط:</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(pricePerGram)}</span>
+                </div>
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>تكلفة المعدن الخام (${weight.toFixed(2)} جرام):</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(metalCost)}</span>
+                </div>
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>رسوم المصنعية:</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(craftsmanshipFee)}</span>
+                </div>
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>رسوم الدمغة (${stampFeePerGram.toFixed(2)} ج.م/جرام):</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(totalStampFee)}</span>
+                </div>
+            `;
+
+            document.getElementById('results-details').innerHTML = resultsHtml;
+            document.getElementById('final-total').textContent = formatCurrency(finalTotal);
+            updateConversationSummary(weight, purity, pricePerGram, metalCost, craftsmanshipFee, totalStampFee, finalTotal);
+        };
+
+        const updateConversationSummary = (weight, purity, pricePerGram, metalCost, craftsmanshipFee, totalStampFee, finalTotal) => {
+            const totalFees = craftsmanshipFee + totalStampFee;
+            const summary = `
+*مصوغات إيهاب كرموز وأخوته*
+
+**عرض سعر لحظي**
+- اسم القطعة: ${document.getElementById('product-name-display').textContent || 'قطعة غير مسجلة'}
+- الوزن والعيار: ${weight.toFixed(2)} جرام عيار ${purity}
+- سعر جرام الـ ${purity} اليوم: ${formatCurrency(pricePerGram)}
+- إجمالي تكلفة الذهب: ${formatCurrency(metalCost)}
+- إجمالي المصنعية والدمغة: ${formatCurrency(totalFees)}
+
+*الإجمالي المطلوب للدفع:* ${formatCurrency(finalTotal)}
+
+(هذا السعر ثابت لهذا اليوم، لا يشمل ضريبة القيمة المضافة)
+            `;
+            document.getElementById('conversation-summary').value = summary.trim();
+        };
+
+        const loadProductByCode = (code) => {
+            const product = PRODUCT_CATALOG[code];
+            if (product) {
+                document.getElementById('weight-input').value = product.weight;
+                document.getElementById('purity-select').value = product.purity;
+                document.getElementById('craftsmanship-input').value = product.craftsmanship;
+                document.getElementById('stamp-fee-input').value = product.stampFee;
+                document.getElementById('product-name-display').textContent = product.name;
+                isProductLoaded = true;
+                calculatePrice();
+            } else {
+                document.getElementById('product-name-display').textContent = `تحذير: لم يتم العثور على المنتج بالكود ${code} في الكتالوج.`;
+                isProductLoaded = false;
+                document.getElementById('weight-input').value = '';
+                document.getElementById('craftsmanship-input').value = '';
+                document.getElementById('stamp-fee-input').value = '';
+                calculatePrice();
+            }
+        };
+
+        // =======================================================
+        // PART 3: JAVASCRIPT UI SETUP AND EVENT LISTENERS
+        // =======================================================
+
+        // 5. دوال الماسح الضوئي (Scanner)
+        const startScanner = () => {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.add('open');
+            const messageElement = document.getElementById('reader-message');
+            messageElement.textContent = 'جارٍ البحث عن الكاميرا...';
+
+            if (!window.Html5Qrcode) {
+                messageElement.textContent = 'خطأ: لم يتم تحميل مكتبة قارئ الكود. تأكد من اتصالك بالإنترنت.';
+                return;
+            }
+            
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                loadProductByCode(decodedText);
+                stopScanner();
+                document.getElementById('barcode-input').value = decodedText;
+            };
+
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback, (errorMessage) => {
+                // رسالة الخطأ تبقى صامتة ما لم يكن هناك خطأ في بدء التشغيل
+            })
+            .catch((err) => {
+                messageElement.textContent = 'فشل بدء الكاميرا. السبب: ' + err.message + ' (تذكر، يجب أن يكون الملف مفتوحاً عبر رابط HTTPS على خادم).';
+            });
+        };
+
+        const stopScanner = () => {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.remove('open');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then((ignore) => {
+                    // Scanner stopped
+                }).catch((err) => {
+                    console.error("Failed to stop scanner:", err);
+                });
+            }
+        };
+
+        // 6. تهيئة الواجهة
+        const setupUI = () => {
+            const puritySelect = document.getElementById('purity-select');
+            const priceUpdateInputs = document.getElementById('price-update-inputs');
+            const barcodeInput = document.getElementById('barcode-input');
+            
+            // ملء خيارات العيار
+            PURITY_OPTIONS.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.value;
+                opt.textContent = option.label;
+                puritySelect.appendChild(opt);
+            });
+
+            // إنشاء حقول تحديث الأسعار اليدوية
+            [24, 21, 18].forEach(karat => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700">عيار ${karat}</label>
+                    <input type="number" id="price-${karat}" value="${currentGoldPrices[karat].toFixed(2)}" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg text-left font-mono"/>
+                `;
+                priceUpdateInputs.appendChild(div);
+            });
+            
+            // تعيين التاريخ الأولي للتحديث
+            document.getElementById('last-updated').textContent = `تحديث أولي: ${new Date().toLocaleDateString('ar-EG')}`;
+
+            // إضافة مستمعي الأحداث
+            ['weight-input', 'purity-select', 'craftsmanship-input', 'stamp-fee-input'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculatePrice);
+            });
+            
+            document.getElementById('apply-prices-btn').addEventListener('click', () => {
+                let allValid = true;
+                [24, 21, 18].forEach(karat => {
+                    const input = document.getElementById(`price-${karat}`);
+                    const newPrice = parseFloat(input.value);
+                    if (newPrice > 0) {
+                        currentGoldPrices[karat] = newPrice;
+                    } else {
+                        allValid = false;
+                    }
+                });
+
+                if (allValid) {
+                    // تحديث أسعار العيارات الأخرى بناءً على 24 للحفاظ على النسب
+                    currentGoldPrices[22] = currentGoldPrices[24] * (22 / 24);
+                    currentGoldPrices[14] = currentGoldPrices[24] * (14 / 24);
+                    
+                    document.getElementById('last-updated').textContent = `تم التحديث يدوياً: ${new Date().toLocaleTimeString('ar-EG')}`;
+                    calculatePrice(); // إعادة الحساب بالأسعار الجديدة
+                } else {
+                    alert('الرجاء إدخال أسعار صحيحة لعيارات 24، 21، و 18.');
+                }
+            });
+
+            document.getElementById('copy-summary-btn').addEventListener('click', () => {
+                const textarea = document.getElementById('conversation-summary');
+                const statusElement = document.getElementById('copy-status');
+                
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    statusElement.textContent = 'تم النسخ بنجاح!';
+                    statusElement.className = 'text-center font-medium text-green-600';
+                } catch (err) {
+                    statusElement.textContent = 'فشل النسخ!';
+                    statusElement.className = 'text-center font-medium text-red-500';
+                }
+
+                setTimeout(() => statusElement.textContent = '', 3000);
+            });
+            
+            // معالجة إدخال الباركود
+            barcodeInput.addEventListener('input', (e) => {
+                const code = e.target.value.trim();
+                if (code.length >= 4) { // يمكن تعديل طول الكود حسب الحاجة
+                    loadProductByCode(code);
+                    if (e.inputType === 'insertLineBreak' || e.inputType === 'insertText') {
+                        e.target.value = ''; // مسح الحقل بعد القراءة
+                    }
+                } else if (code.length === 0 && isProductLoaded) {
+                    // إذا مسح الموظف الحقل يدوياً بعد التحميل، يجب أن يتم مسح اسم المنتج
+                    document.getElementById('product-name-display').textContent = '';
+                    isProductLoaded = false;
+                }
+            });
+            
+            // مستمعي أحداث الكاميرا
+            document.getElementById('scan-camera-btn').addEventListener('click', startScanner);
+            document.getElementById('close-scanner-btn').addEventListener('click', stopScanner);
+
+
+            // الحساب الأولي عند التحميل
+            calculatePrice();
+        };
+
+        // **الضمان الحاسم: تشغيل الكود بعد تحميل الصفحة بالكامل**
+        document.addEventListener('DOMContentLoaded', setupUI);
+    </script>
+</body>
+</html>

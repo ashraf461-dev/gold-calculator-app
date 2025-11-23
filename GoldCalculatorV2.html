@@ -3,48 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة أسعار الذهب</title>
-    <!-- Tailwind CSS CDN -->
+    <title>حاسبة تسعير الذهب - مصوغات إيهاب كرموز وأخوته</title>
+    <!-- تحميل مكتبة Tailwind CSS مباشرة -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- QR Code Scanner Library (html5-qrcode) -->
+    <!-- تحميل مكتبة Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- مكتبة قراءة الباركود والكيو آر كود (لتفعيل الكاميرا) -->
     <script src="https://unpkg.com/html5-qrcode@2.3.4/umd/html5-qrcode.js"></script>
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background-color: #ffffff;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-            padding: 24px;
-        }
-        /* Custom styling for the Modal backdrop and content */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none; /* Initially hidden */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 1rem;
-        }
-        .modal.open {
-            display: flex;
-        }
+        /* خط القاهرة لدعم اللغة العربية */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-sans { font-family: 'Cairo', sans-serif; }
+        .modal { display: none; }
+        .modal.open { display: flex; }
         .modal-content {
             background-color: #fff;
             padding: 24px;
@@ -56,352 +28,409 @@
         #reader {
             width: 100%;
             min-height: 250px;
-            border: 2px solid #ef4444;
+            border: 2px solid #3b82f6; /* لون أزرق للماسح */
             border-radius: 8px;
             margin-bottom: 15px;
             overflow: hidden;
         }
+        .text-input {
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            transition: border-color 0.2s;
+        }
+        .text-input:focus {
+            border-color: #f59e0b; /* لون أصفر عند التركيز */
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 p-4 sm:p-8 font-sans">
+    <div class="max-w-xl mx-auto space-y-8">
+        
+        <!-- ======================================================= -->
+        <!-- رأس الصفحة (Header) - اسم المتجر والشعار -->
+        <!-- ======================================================= -->
+        <header class="bg-white p-6 rounded-3xl shadow-2xl border-b-4 border-yellow-500 text-center">
+            <!-- الشعار -->
+            <img 
+                src="https://scontent.fcai1-3.fna.fbcdn.net/v/t39.30808-6/386538519_645676091034984_4961061305986289104_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFx1BloX8fTG0T7P677BZeSfFM9BLX9Oxl8Uz0Etf07GY6y56jdPvUaBERy3o1DqWJUxUTOUidFTE2uXOhdXP7K&_nc_ohc=BqUvHWwhRLkQ7kNvwEZdEtO&_nc_oc=AdmwNZoIDiL_NvSEnJvmNO7lbbUjkR5_3TRYBJx-w2jvovMCcd2QVf43k2b8G4F9h17G2ax0grpngSeTLWPYI&_nc_zt=23&_nc_ht=scontent.fcai1-3.fna&_nc_gid=u51pnq-LuZ7bWRz9SOW8ig&oh=00_Afh6uTtB0ZwsyItuQBfmWSNofXW87RTXY-GVAFVl0kOTdQ&oe=691220ED" 
+                onerror="this.onerror=null; this.src='https://placehold.co/80x80/FFD700/000000?text=GOLD'"
+                alt="شعار مصوغات إيهاب كرموز وأخوته" 
+                class="mx-auto w-20 h-20 object-contain mb-3 rounded-full border-2 border-yellow-400"
+            />
+            <h2 class="text-xl font-extrabold text-gray-800 mb-1">مصوغات إيهاب كرموز وأخوته</h2>
+            <h1 class="text-3xl font-extrabold text-indigo-700">حاسبة سعر الذهب الفورية (ج.م)</h1>
+        </header>
 
-    <div class="container">
-        <h1 class="text-3xl font-bold text-center text-yellow-600 mb-6 border-b pb-3">حاسبة سعر الذهب</h1>
-
-        <!-- قسم الإدخالات (الأسعار والوزن) -->
-        <div class="space-y-4">
-            <!-- سعر الجرام الحالي -->
-            <div>
-                <label for="current-price" class="block text-sm font-medium text-gray-700 mb-1">سعر الجرام الحالي ($)</label>
-                <input type="number" id="current-price" value="70.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-right" placeholder="أدخل سعر الجرام بالدولار">
+        <!-- ======================================================= -->
+        <!-- قسم تحديث الأسعار يدوياً (Manual Price Update) -->
+        <!-- ======================================================= -->
+        <div class="bg-yellow-50 p-6 rounded-3xl shadow-lg border-2 border-yellow-300">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fa-solid fa-calculator ml-2 text-yellow-600"></i>
+                تحديث أسعار السوق (إلزامي)
+            </h3>
+            <div id="price-update-inputs" class="grid grid-cols-3 gap-3">
+                <!-- Inputs will be created by JS -->
             </div>
-
-            <!-- العيار -->
-            <div>
-                <label for="carat-select" class="block text-sm font-medium text-gray-700 mb-1">العيار (قيراط)</label>
-                <select id="carat-select" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white text-right">
-                    <option value="24" data-pure-gold="1">عيار 24 (ذهب نقي)</option>
-                    <option value="22" data-pure-gold="0.9167">عيار 22</option>
-                    <option value="21" data-pure-gold="0.875" selected>عيار 21</option>
-                    <option value="18" data-pure-gold="0.750">عيار 18</option>
-                    <option value="14" data-pure-gold="0.5833">عيار 14</option>
-                </select>
-            </div>
-
-            <!-- الوزن بالجرام -->
-            <div>
-                <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">الوزن (جرام)</label>
-                <input type="number" id="weight" value="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 text-right" placeholder="أدخل الوزن بالجرام">
-            </div>
-            
-            <!-- زر المسح بالكاميرا -->
-            <button id="scan-button" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-200">
-                مسح بالكاميرا (رمز المنتج / QR)
+            <button id="apply-prices-btn" class="w-full mt-4 py-2 bg-yellow-600 text-white font-semibold rounded-xl hover:bg-yellow-700 transition duration-300">
+                تطبيق الأسعار الجديدة
             </button>
+            <p id="last-updated" class="text-sm text-center text-gray-600 mt-2"></p>
         </div>
 
-        <!-- قسم النتائج -->
-        <div class="mt-8 pt-6 border-t border-gray-200 space-y-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">النتائج والحسابات:</h2>
-
-            <!-- سعر الجرام الصافي للعيار المختار -->
-            <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                <span class="text-sm font-medium text-gray-600">سعر جرام الذهب الصافي (للعيار):</span>
-                <span id="carat-price" class="text-lg font-bold text-yellow-700">0.00 $</span>
+        <!-- ======================================================= -->
+        <!-- قسم إدخال الباركود / المنتج -->
+        <!-- ======================================================= -->
+        <div class="bg-white p-6 rounded-3xl shadow-xl space-y-6">
+            <h3 class="text-xl font-bold text-indigo-700 border-r-4 border-indigo-500 pr-3">
+                إدخال القطعة
+            </h3>
+            <div>
+                <label for="barcode-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                    <i class="fa-solid fa-barcode ml-2 text-indigo-500"></i>
+                    امسح الباركود أو أدخل الرقم يدوياً
+                </label>
+                <input
+                    type="text"
+                    id="barcode-input"
+                    placeholder="مثال: 1001"
+                    class="w-full text-input text-lg font-mono text-left rtl:text-right"
+                />
+                <button id="scan-camera-btn" class="w-full mt-2 py-2 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition duration-300">
+                    <i class="fa-solid fa-camera ml-2"></i> مسح بالكاميرا
+                </button>
+                <p id="product-name-display" class="mt-2 text-sm font-semibold text-green-600"></p>
             </div>
             
-            <!-- سعر الذهب النهائي للبيع للعميل -->
-            <div class="p-4 bg-red-100 border-2 border-red-400 rounded-xl">
-                <span class="block text-lg font-medium text-red-700">السعر النهائي للبيع للعميل:</span>
-                <span id="final-price" class="block text-4xl font-extrabold text-red-900 mt-1">0.00 $</span>
+            <!-- حقول الإدخال اليدوي -->
+            <div id="manual-inputs-section" class="space-y-4">
+                <!-- Ciyyar Input -->
+                <div>
+                    <label for="purity-select" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-gauge-high ml-2 text-indigo-500"></i>
+                        عيار الذهب (القيراط)
+                    </label>
+                    <select id="purity-select" class="w-full text-input text-lg font-mono text-left rtl:text-right">
+                        <!-- Options will be added by JS -->
+                    </select>
+                </div>
+
+                <!-- Weight Input -->
+                <div>
+                    <label for="weight-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-scale-balanced ml-2 text-indigo-500"></i>
+                        وزن القطعة (بالجرام)
+                    </label>
+                    <input type="number" id="weight-input" placeholder="مثال: 4.5" min="0" step="0.01" class="w-full text-input text-lg font-mono text-left rtl:text-right"/>
+                </div>
+
+                <!-- Craftsmanship Fee Input -->
+                <div>
+                    <label for="craftsmanship-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-hammer ml-2 text-indigo-500"></i>
+                        رسوم المصنعية (ثابتة للقطعة)
+                    </label>
+                    <input type="number" id="craftsmanship-input" placeholder="مثال: 150.00" min="0" step="0.01" class="w-full text-input text-lg font-mono text-left rtl:text-right"/>
+                </div>
+
+                <!-- Stamp Fee Per Gram Input -->
+                <div>
+                    <label for="stamp-fee-input" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <i class="fa-solid fa-stamp ml-2 text-indigo-500"></i>
+                        رسوم الدمغة لكل جرام
+                    </label>
+                    <input type="number" id="stamp-fee-input" placeholder="مثال: 10.00" min="0" step="0.01" class="w-full text-input text-lg font-mono text-left rtl:text-right"/>
+                </div>
             </div>
         </div>
+        
+        <!-- ======================================================= -->
+        <!-- قسم ملخص النتائج (Results Summary) -->
+        <!-- ======================================================= -->
+        <div class="bg-indigo-700 p-6 rounded-3xl shadow-xl text-white space-y-4">
+            <h2 class="text-2xl font-bold border-b border-indigo-500 pb-3 mb-4 flex items-center justify-center">
+                <i class="fa-solid fa-money-bill-wave ml-2 text-yellow-300"></i>
+                ملخص التكلفة النهائية
+            </h2>
+            <div id="results-details" class="space-y-2">
+                <!-- Results will be displayed here -->
+            </div>
+            <div class="flex justify-between items-center text-3xl pt-4 font-extrabold text-white border-t border-indigo-500 mt-4">
+                <span>الإجمالي الكلي:</span>
+                <span id="final-total" class="font-mono text-4xl text-yellow-400">0.00 ج.م</span>
+            </div>
+        </div>
+        
+        <!-- ======================================================= -->
+        <!-- قسم الملخص الجاهز للنسخ -->
+        <!-- ======================================================= -->
+        <div class="bg-white p-6 rounded-3xl shadow-xl space-y-4">
+            <h3 class="text-xl font-bold text-indigo-700">ملخص جاهز للمحادثة</h3>
+            <textarea id="conversation-summary" readonly class="w-full p-3 h-48 border border-gray-300 rounded-xl bg-gray-50 font-sans text-sm resize-none"></textarea>
+            <button id="copy-summary-btn" class="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md">
+                <i class="fa-solid fa-copy ml-2"></i>
+                نسخ الملخص
+            </button>
+            <p id="copy-status" class="text-center font-medium"></p>
+        </div>
+
     </div>
-
-    <!-- النافذة المنبثقة للماسح الضوئي (Scanner Modal) -->
-    <div id="scanner-modal" class="modal">
+    
+    <!-- ======================================================= -->
+    <!-- نافذة الماسح الضوئي (Modal Scanner) -->
+    <!-- ======================================================= -->
+    <div id="scanner-modal" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-center justify-center p-4">
         <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">مسح كود المنتج</h2>
-            <p id="reader-message" class="text-sm text-gray-600 mb-4">وجه الكاميرا نحو الباركود/الكيو آر كود.</p>
-            
+            <h3 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+                <i class="fa-solid fa-qrcode ml-2"></i> ماسح الباركود بالكاميرا
+            </h3>
             <!-- مساحة عرض الكاميرا/الماسح الضوئي -->
             <div id="reader"></div>
-
-            <p class="text-xs text-gray-500 mb-4">سيتم إغلاق النافذة تلقائياً عند نجاح المسح.</p>
-            
-            <button id="close-scanner-button" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-200">
-                إلغاء
+            <p id="reader-message" class="text-sm text-gray-600 mb-4">جارٍ تحميل الكاميرا... (تذكر، الكاميرا تحتاج لـ HTTPS)</p>
+            <button id="close-scanner-btn" class="w-full py-2 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700">
+                إغلاق الماسح
             </button>
         </div>
     </div>
 
-    <script type="module">
-        // ===========================================
-        // // PART 1: FIREBASE INITIALIZATION AND AUTH
-        // // ===========================================
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        setLogLevel('Debug');
-        
-        // Global variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let app, db, auth, userId = null;
-        let isAuthReady = false;
-
-        if (firebaseConfig) {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // 1. Handle Authentication
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                    } else {
-                        // Sign in anonymously if no token is available or user is signed out
-                        try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                        } catch (error) {
-                            console.error("Firebase Sign-In Error:", error);
-                            // Fallback to random ID if sign-in fails
-                            userId = crypto.randomUUID();
-                        }
-                    }
-                    isAuthReady = true;
-                    console.log("Auth Ready. User ID:", userId);
-                    if (userId) {
-                         // Start listening to data once authenticated
-                        startListeningToData();
-                    }
-                });
-
-            } catch (error) {
-                console.error("Firebase Initialization Error:", error);
-            }
-        } else {
-            console.error("Firebase config is not available.");
-            isAuthReady = true; // Still allow app to run, but without persistence
-            userId = crypto.randomUUID();
-        }
-
-        // ===========================================
-        // // PART 2: FIREBASE DATA HANDLING (PRICES)
-        // // ===========================================
-        const CURRENT_PRICE_COLLECTION = 'goldPrices';
-        const PRICE_DOC_ID = 'latest';
-
-        const currentPriceInput = document.getElementById('current-price');
-
-        /**
-         * Gets the Firestore document reference for the latest price.
-         * Stores public data in: /artifacts/{appId}/public/data/goldPrices/latest
-         */
-        const getPriceDocRef = () => {
-             // Use a public path so all users share the same price data
-            const path = `/artifacts/${appId}/public/data/${CURRENT_PRICE_COLLECTION}/${PRICE_DOC_ID}`;
-            return doc(db, path);
+    <!-- ======================================================= -->
+    <!-- JavaScript Core Logic and UI Setup -->
+    <!-- ======================================================= -->
+    <script>
+        // 1. ثوابت الأسعار والخيارات
+        const INITIAL_GOLD_PRICES = {
+            24: 6086.00, 
+            22: 5579.00, 
+            21: 5325.00, 
+            18: 4564.00, 
+            14: 3550.00, 
         };
-        
-        /**
-         * Starts real-time listening for gold price updates from Firestore.
-         */
-        function startListeningToData() {
-            if (!db || !isAuthReady) return;
 
-            console.log("Starting onSnapshot listener for gold price...");
-            const priceDocRef = getPriceDocRef();
+        const PRODUCT_CATALOG = {
+            "1001": { name: "خاتم سوليتير عريض", weight: 4.5, purity: 21, craftsmanship: 300.00, stampFee: 12.00 },
+            "1002": { name: "قلادة خفيفة", weight: 7.2, purity: 18, craftsmanship: 180.00, stampFee: 8.00 },
+            "1003": { name: "إسوارة عيار 24", weight: 15.0, purity: 24, craftsmanship: 50.00, stampFee: 20.00 },
+            // **يمكن تعديل هذه القائمة بقطع متجرك الفعلية**
+        };
 
-            onSnapshot(priceDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const newPrice = data.price;
-                    if (newPrice !== parseFloat(currentPriceInput.value)) {
-                        currentPriceInput.value = newPrice.toFixed(2);
-                        console.log("Price updated from Firestore:", newPrice);
-                        calculateFinalPrice(); // Recalculate upon price change
-                    }
-                } else {
-                    console.log("No price data found in Firestore, setting default.");
-                    // Save the default value back to Firestore if not found
-                    updatePriceInFirestore(parseFloat(currentPriceInput.value));
-                }
-            }, (error) => {
-                console.error("Firestore onSnapshot error:", error);
-            });
-        }
+        const PURITY_OPTIONS = [
+            { value: 24, label: '24 قيراط (999)' },
+            { value: 22, label: '22 قيراط (916)' },
+            { value: 21, label: '21 قيراط (875)' },
+            { value: 18, label: '18 قيراط (750)' },
+            { value: 14, label: '14 قيراط (585)' },
+        ];
 
-        /**
-         * Updates the gold price in Firestore.
-         * @param {number} price - The new current gold price.
-         */
-        async function updatePriceInFirestore(price) {
-            if (!db || !isAuthReady) {
-                console.warn("Database or Auth not ready. Cannot save price.");
-                return;
-            }
-            try {
-                const priceDocRef = getPriceDocRef();
-                await setDoc(priceDocRef, { price: price, lastUpdated: new Date() }, { merge: true });
-                console.log("Price saved to Firestore:", price);
-            } catch (error) {
-                console.error("Error writing price to Firestore:", error);
-            }
-        }
-
-        // ===========================================
-        // // PART 3: CALCULATIONS AND UI LOGIC
-        // // ===========================================
-        const weightInput = document.getElementById('weight');
-        const caratSelect = document.getElementById('carat-select');
-        const caratPriceElement = document.getElementById('carat-price');
-        const finalPriceElement = document.getElementById('final-price');
-
-        /**
-         * Calculates the gold price based on current price, weight, and carat.
-         */
-        function calculateFinalPrice() {
-            const currentPrice = parseFloat(currentPriceInput.value) || 0;
-            const weight = parseFloat(weightInput.value) || 0;
-            const selectedOption = caratSelect.options[caratSelect.selectedIndex];
-            const pureGoldRatio = parseFloat(selectedOption.getAttribute('data-pure-gold')) || 0;
-
-            // 1. Calculate price of 1 gram of the selected carat
-            const pricePerGram = currentPrice * pureGoldRatio;
-            
-            // 2. Calculate final price (Price * Weight)
-            const finalPrice = pricePerGram * weight;
-
-            // Update UI elements
-            caratPriceElement.textContent = `${pricePerGram.toFixed(2)} $`;
-            finalPriceElement.textContent = `${finalPrice.toFixed(2)} $`;
-        }
-        
-        // Event Listeners for UI interaction
-        currentPriceInput.addEventListener('input', () => {
-            calculateFinalPrice();
-            // Also update the price in Firestore when the user changes it
-            updatePriceInFirestore(parseFloat(currentPriceInput.value) || 0);
-        });
-        weightInput.addEventListener('input', calculateFinalPrice);
-        caratSelect.addEventListener('change', calculateFinalPrice);
-
-        // Initial calculation on load
-        calculateFinalPrice();
-
-        // ===========================================
-        // // PART 4: QR CODE SCANNER LOGIC
-        // // ===========================================
-        const scanButton = document.getElementById('scan-button');
-        const modal = document.getElementById('scanner-modal');
-        const closeModalButton = document.getElementById('close-scanner-button');
-        const readerMessageElement = document.getElementById('reader-message');
-
+        let currentGoldPrices = { ...INITIAL_GOLD_PRICES };
+        let isProductLoaded = false;
         let html5QrCode = null;
 
-        /**
-         * Closes the scanner modal and stops the camera.
-         */
-        function closeScanner() {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    console.log("QR Code scanning stopped.");
-                }).catch(err => {
-                    console.error("Error stopping QR Code scanner:", err);
-                });
-            }
-            modal.classList.remove('open');
-            readerMessageElement.textContent = 'وجه الكاميرا نحو الباركود/الكيو آر كود.';
-        }
+        // 2. دوال المساعدة
+        const formatCurrency = (amount) => `${(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ج.م`;
 
-        /**
-         * Handles successful QR code scan.
-         * @param {string} decodedText - The result of the scan.
-         */
-        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-            console.log("Scan successful:", decodedText);
+        const calculatePrice = () => {
+            const weight = parseFloat(document.getElementById('weight-input').value) || 0;
+            const purity = parseInt(document.getElementById('purity-select').value) || 21;
+            const craftsmanshipFee = parseFloat(document.getElementById('craftsmanship-input').value) || 0;
+            const stampFeePerGram = parseFloat(document.getElementById('stamp-fee-input').value) || 0;
             
-            // Check if the decoded text is a number
-            if (!isNaN(parseFloat(decodedText))) {
-                const scannedWeight = parseFloat(decodedText);
-                weightInput.value = scannedWeight; // Set the weight input
-                calculateFinalPrice();             // Recalculate price
-                readerMessageElement.textContent = 'تم قراءة الكود بنجاح!';
-                setTimeout(closeScanner, 500); // Close after a short delay
+            const pricePerGram = currentGoldPrices[purity] || 0; 
+            const metalCost = weight * pricePerGram;
+            const totalStampFee = weight * stampFeePerGram;
+            const finalTotal = metalCost + craftsmanshipFee + totalStampFee;
+
+            const resultsHtml = `
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>سعر جرام الـ ${purity} قيراط:</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(pricePerGram)}</span>
+                </div>
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>تكلفة المعدن الخام (${weight.toFixed(2)} جرام):</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(metalCost)}</span>
+                </div>
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>رسوم المصنعية:</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(craftsmanshipFee)}</span>
+                </div>
+                <div class="flex justify-between items-center text-lg py-2 border-b border-indigo-600">
+                    <span>رسوم الدمغة (${stampFeePerGram.toFixed(2)} ج.م/جرام):</span>
+                    <span class="font-mono text-yellow-300 font-bold">${formatCurrency(totalStampFee)}</span>
+                </div>
+            `;
+
+            document.getElementById('results-details').innerHTML = resultsHtml;
+            document.getElementById('final-total').textContent = formatCurrency(finalTotal);
+            updateConversationSummary(weight, purity, pricePerGram, metalCost, craftsmanshipFee, totalStampFee, finalTotal);
+        };
+
+        const updateConversationSummary = (weight, purity, pricePerGram, metalCost, craftsmanshipFee, totalStampFee, finalTotal) => {
+            const totalFees = craftsmanshipFee + totalStampFee;
+            const summary = `
+*مصوغات إيهاب كرموز وأخوته*
+
+**عرض سعر لحظي**
+- اسم القطعة: ${document.getElementById('product-name-display').textContent || 'قطعة غير مسجلة'}
+- الوزن والعيار: ${weight.toFixed(2)} جرام عيار ${purity}
+- سعر جرام الـ ${purity} اليوم: ${formatCurrency(pricePerGram)}
+- إجمالي تكلفة الذهب: ${formatCurrency(metalCost)}
+- إجمالي المصنعية والدمغة: ${formatCurrency(totalFees)}
+
+*الإجمالي المطلوب للدفع:* ${formatCurrency(finalTotal)}
+
+(هذا السعر ثابت لهذا اليوم)
+            `;
+            document.getElementById('conversation-summary').value = summary.trim();
+        };
+
+        const loadProductByCode = (code) => {
+            const product = PRODUCT_CATALOG[code];
+            if (product) {
+                document.getElementById('weight-input').value = product.weight;
+                document.getElementById('purity-select').value = product.purity;
+                document.getElementById('craftsmanship-input').value = product.craftsmanship;
+                document.getElementById('stamp-fee-input').value = product.stampFee;
+                document.getElementById('product-name-display').textContent = product.name;
+                isProductLoaded = true;
+                calculatePrice();
             } else {
-                 readerMessageElement.textContent = `تم مسح كود غير رقمي: ${decodedText}. يرجى محاولة مسح الوزن (رقم) أو كود آخر.`;
+                document.getElementById('product-name-display').textContent = `تحذير: لم يتم العثور على المنتج بالكود ${code} في الكتالوج.`;
+                isProductLoaded = false;
+                document.getElementById('weight-input').value = '';
+                document.getElementById('craftsmanship-input').value = '';
+                document.getElementById('stamp-fee-input').value = '';
+                calculatePrice();
             }
         };
 
-        /**
-         * Starts the QR code scanner (Camera).
-         */
-        async function startScanner() {
+        // 3. دوال الماسح الضوئي (Scanner)
+        const startScanner = () => {
+            const modal = document.getElementById('scanner-modal');
             modal.classList.add('open');
-            readerMessageElement.textContent = '...جاري البحث عن الكاميرا.';
+            const messageElement = document.getElementById('reader-message');
+            messageElement.textContent = 'جارٍ البحث عن الكاميرا...';
 
-            // Check if the library is loaded and available
             if (typeof Html5Qrcode === 'undefined') {
-                readerMessageElement.textContent = 'خطأ: لم يتم تحميل مكتبة قارئ الكود. تأكد من اتصالك بالإنترنت.';
-                console.error("Html5Qrcode library not found.");
+                messageElement.textContent = 'خطأ: لم يتم تحميل مكتبة قارئ الكود.';
                 return;
             }
-
-            // Initialize the scanner object only once
+            
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
-
-            // Configuration for the scanner
-            const config = { 
-                fps: 10, 
-                qrbox: { width: 250, height: 250 },
-                supportedScanTypes: [
-                    Html5QrcodeSupportedDevices.FRONT_CAMERA,
-                    Html5QrcodeSupportedDevices.REAR_CAMERA,
-                    Html5QrcodeSupportedDevices.USER
-                ]
+            
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                loadProductByCode(decodedText);
+                stopScanner();
+                document.getElementById('barcode-input').value = decodedText;
             };
 
-            try {
-                // Start scanning
-                await html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback, (errorMessage) => {
-                    // Update the message on continuous failure/error
-                    if (errorMessage.includes("no camera has been found")) {
-                         readerMessageElement.textContent = 'لم يتم العثور على كاميرا. تأكد من سماح المتصفح بالوصول للكاميرا.';
-                    } else if (!html5QrCode.isScanning) {
-                        // Only update if not already scanning successfully
-                        readerMessageElement.textContent = '...جاري بدء تشغيل الكاميرا.';
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback, (errorMessage) => {
+                // Keep errors silent during scan
+            })
+            .catch((err) => {
+                messageElement.textContent = 'فشل بدء الكاميرا. السبب: ' + err.message + ' (تأكد من إعطاء الإذن).';
+            });
+        };
+
+        const stopScanner = () => {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.remove('open');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    console.log("Scanner stopped.");
+                }).catch((err) => {
+                    console.error("Failed to stop scanner:", err);
+                });
+            }
+        };
+
+        // 4. تهيئة الواجهة والمستمعات
+        const setupUI = () => {
+            const puritySelect = document.getElementById('purity-select');
+            const priceUpdateInputs = document.getElementById('price-update-inputs');
+            const barcodeInput = document.getElementById('barcode-input');
+            
+            // ملء خيارات العيار
+            PURITY_OPTIONS.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.value;
+                opt.textContent = option.label;
+                puritySelect.appendChild(opt);
+            });
+
+            // إنشاء حقول تحديث الأسعار اليدوية
+            [24, 21, 18].forEach(karat => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700">عيار ${karat}</label>
+                    <input type="number" id="price-${karat}" value="${currentGoldPrices[karat].toFixed(2)}" step="0.01" class="w-full text-input text-left font-mono"/>
+                `;
+                priceUpdateInputs.appendChild(div);
+            });
+            
+            document.getElementById('last-updated').textContent = `تحديث أولي: ${new Date().toLocaleDateString('ar-EG')}`;
+
+            // إضافة مستمعي الأحداث للحساب
+            ['weight-input', 'purity-select', 'craftsmanship-input', 'stamp-fee-input'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculatePrice);
+            });
+            
+            document.getElementById('apply-prices-btn').addEventListener('click', () => {
+                let allValid = true;
+                [24, 21, 18].forEach(karat => {
+                    const input = document.getElementById(`price-${karat}`);
+                    const newPrice = parseFloat(input.value);
+                    if (newPrice > 0) {
+                        currentGoldPrices[karat] = newPrice;
+                    } else {
+                        allValid = false;
                     }
                 });
-                console.log("Scanner started successfully.");
-                readerMessageElement.textContent = 'الكاميرا جاهزة. وجهها نحو الكود.';
-            } catch (err) {
-                console.error("Failed to start scanner:", err);
-                readerMessageElement.textContent = `فشل تشغيل الكاميرا: ${err.message || 'خطأ غير معروف'}.`;
-            }
-        }
-        
-        // Scanner Button Event Listener
-        scanButton.addEventListener('click', startScanner);
-        closeModalButton.addEventListener('click', closeScanner);
-        
-        // Close modal when clicking outside (on the backdrop)
-        modal.addEventListener('click', (e) => {
-            if (e.target.id === 'scanner-modal') {
-                closeScanner();
-            }
-        });
+
+                if (allValid) {
+                    currentGoldPrices[22] = currentGoldPrices[24] * (22 / 24);
+                    currentGoldPrices[14] = currentGoldPrices[24] * (14 / 24);
+                    
+                    document.getElementById('last-updated').textContent = `تم التحديث يدوياً: ${new Date().toLocaleTimeString('ar-EG')}`;
+                    calculatePrice();
+                } else {
+                    alert('الرجاء إدخال أسعار صحيحة لعيارات 24، 21، و 18.');
+                }
+            });
+
+            document.getElementById('copy-summary-btn').addEventListener('click', () => {
+                const textarea = document.getElementById('conversation-summary');
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    document.getElementById('copy-status').textContent = 'تم النسخ بنجاح!';
+                } catch (err) {
+                    document.getElementById('copy-status').textContent = 'فشل النسخ!';
+                }
+                setTimeout(() => document.getElementById('copy-status').textContent = '', 3000);
+            });
+            
+            barcodeInput.addEventListener('input', (e) => {
+                const code = e.target.value.trim();
+                if (code.length >= 4) { 
+                    loadProductByCode(code);
+                } else if (code.length === 0 && isProductLoaded) {
+                    document.getElementById('product-name-display').textContent = '';
+                    isProductLoaded = false;
+                }
+            });
+            
+            document.getElementById('scan-camera-btn').addEventListener('click', startScanner);
+            document.getElementById('close-scanner-btn').addEventListener('click', stopScanner);
+
+            calculatePrice();
+        };
+
+        document.addEventListener('DOMContentLoaded', setupUI);
     </script>
 </body>
 </html>
